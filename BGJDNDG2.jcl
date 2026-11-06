@@ -1,21 +1,14 @@
-//*  %%INCLIB MBVC.PROD.SYMBOLS %%INCMEM GLOBALES
-//BGREPFML JOB CLASS=J,
+//*  %%INCLIB MBVD.PROD.SYMBOLS %%INCMEM GLOBALES
+//BGJDNDG2 JOB CLASS=J,
 //             MSGCLASS=X,
 //             MSGLEVEL=1,
 //             REGION=0M
-//JOBLIB   DD DSN=PEBC.ALTAMIRA.LOADLIB.BATCH,DISP=SHR
-//         DD DSN=PEBC.ALTAMIRA.LOADLIB.RUTINAS,DISP=SHR
+//JOBLIB   DD DSN=PEBD.ALTAMIRA.LOADLIB.BATCH,DISP=SHR
+//         DD DSN=PEBD.ALTAMIRA.LOADLIB.RUTINAS,DISP=SHR
 //         DD DSN=LDB2DTDB.SDSNEXIT,DISP=SHR
 //         DD DSN=LDB2DTDB.SDSNLOAD,DISP=SHR
 //         DD DISP=SHR,DSN=CEE.SCEERUN
 //*------- VARIABLES DE PROCESO --------------*
-//*  AL PROMOVER ENTRE AMBIENTES SOLO SE CAMBIAN ESTAS TRES LINEAS:
-//*  PREFIJO = PRIMER CALIFICADOR DEL ARCHIVO DE SALIDA
-//*  CREATOR = CREADOR DE LAS TABLAS BGDTAPE Y TCDT050
-//*  SSID    = SUBSISTEMA DB2
-//*  %%SET %%PREFIJO=PEBD
-//*  %%SET %%CREATOR=GPBC
-//*  %%SET %%SSID=DTDB
 //**********************************************************************
 //*         REPORTE DE PREAPERTURAS FORMALIZADAS DE BGDTAPE            *
 //*         PRODUCTO 02 / SUBPRODUCTO 0046-0047 - CSV SEPARADO POR ;   *
@@ -26,17 +19,17 @@
 //* XXXXXXXX 03-11-2026  XXXXXXX    CREACION DEL JOB. REPORTE CSV DE
 //*                                 BGDTAPE PARA NOMINA DIGITAL 2.0
 //**********************************************************************
-//* PASO    : BGFML010                                                 *
+//* PASO    : BGNDG010                                                 *
 //* PGM/UTIL: IDCAMS                                                   *
 //* OBJETIVO: BORRA EL REPORTE DEL DIA SI EXISTE (PERMITE RELANZAR)    *
 //**********************************************************************
-//BGFML010 EXEC PGM=IDCAMS
+//BGNDG010 EXEC PGM=IDCAMS
 //SYSPRINT DD  SYSOUT=*
 //SYSIN    DD  *
-  DELETE %%PREFIJO.BGFD.FIX.DX.BGDTAPE.UNLDIA.D1%%ODATE NONVSAM PURGE
+  DELETE PEBD.BGFD.FIX.DX.BGDTAPE.UNLDIA1.D1%%ODATE NONVSAM PURGE
   IF LASTCC = 8 THEN SET MAXCC = 0
 //**********************************************************************
-//* PASO    : BGFML020                                                 *
+//* PASO    : BGNDG020                                                 *
 //* PGM/UTIL: ADUUMAIN (BMC UNLOAD PLUS)                               *
 //* OBJETIVO: EJECUTA SEL_BGDTAPE Y ARMA CADA FILA COMO LINEA CSV (;)  *
 //*           LA QUERY ORIGINAL VA COMO SUBCONSULTA X; ORDER OF X      *
@@ -45,8 +38,8 @@
 //*           LA FECHA DE PROCESO, QUITAR EL -- DE LA LINEA DEL FILTRO *
 //*           APE_FECHA_FORMAL.                                        *
 //**********************************************************************
-//BGFML020 EXEC PGM=ADUUMAIN,COND=(4,LT),
-//             PARM='%%SSID,BGREPFML,NEW,,MSGLEVEL(1)'
+//BGNDG020 EXEC PGM=ADUUMAIN,COND=(4,LT),
+//             PARM='DTDB,BGJDNDG2,NEW,,MSGLEVEL(1)'
 //SYSPRINT DD  SYSOUT=*
 //UTPRINT  DD  SYSOUT=*
 //SYSOUT   DD  SYSOUT=*
@@ -95,8 +88,8 @@
       END AS CANAL_DESC,
       VARCHAR_FORMAT(TAPE.APE_TIMEST_UMO, 'YYYY-MM-DD HH24:MI:SS')
                                                           AS TIMEST
-     FROM %%CREATOR.BGDTAPE TAPE
-     LEFT JOIN %%CREATOR.TCDT050 TCDT
+     FROM GPBD.BGDTAPE TAPE
+     LEFT JOIN GPBD.TCDT050 TCDT
             ON TAPE.APE_CENTRO_UMO=TCDT.TCCOFICI
      WHERE TAPE.APE_PRODUCTO = '02'
      AND TAPE.APE_SUBPRODU IN ('0046', '0047')
@@ -107,15 +100,15 @@
      ) X
      ORDER BY ORDER OF X
 //**********************************************************************
-//* PASO    : BGFML030                                                 *
+//* PASO    : BGNDG030                                                 *
 //* PGM/UTIL: SORT                                                     *
 //* OBJETIVO: REEMPLAZA CARACTERES NO IMPRIMIBLES POR ESPACIOS, AGREGA *
 //*           LA CABECERA Y GRABA EL REPORTE DEL DIA                   *
 //**********************************************************************
-//BGFML030 EXEC  PGM=ICEMAN,COND=(4,LT)
+//BGNDG030 EXEC  PGM=ICEMAN,COND=(4,LT)
 //SYSOUT   DD SYSOUT=*
 //SORTIN   DD DSN=&&BGDTAPE,DISP=(OLD,DELETE,DELETE)
-//SORTOUT  DD DSN=%%PREFIJO.BGFD.FIX.DX.BGDTAPE.UNLDIA.D1%%ODATE,
+//SORTOUT  DD DSN=PEBD.BGFD.FIX.DX.BGDTAPE.UNLDIA1.D1%%ODATE,
 //            DISP=(NEW,CATLG,DELETE),UNIT=3390,
 //            SPACE=(CYL,(10,10),RLSE),
 //            DCB=(RECFM=FB,LRECL=171,BLKSIZE=0,DSORG=PS)
