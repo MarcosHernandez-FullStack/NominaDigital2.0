@@ -16,7 +16,7 @@
 //**********************************************************************
 //*         MODIFICACIONES/ACTUALIZACIONES                             *
 //**********************************************************************
-//* XXXXXXXX 03-11-2026  XXXXXXX    CREACION DEL JOB. REPORTE CSV DE
+//* XXXXXXXX 03-11-2026  XP79253    CREACION DEL JOB. REPORTE CSV DE
 //*                                 BGDTAPE PARA NOMINA DIGITAL 2.0
 //**********************************************************************
 //* PASO    : BGNDG010                                                 *
