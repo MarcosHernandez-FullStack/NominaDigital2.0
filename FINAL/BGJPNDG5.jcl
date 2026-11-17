@@ -32,29 +32,32 @@
 //*                                                                    *
 //*--------------------------------------------------------------------*
 //* DEFINICION DE VARIABLES
-//* %%SET %%AA = %%SUBSTR %%ODATE 1 2
-//* %%SET %%MM = %%SUBSTR %%ODATE 3 2
-//* %%SET %%DD = %%SUBSTR %%ODATE 5 2
-//* %%SET %%FECHAD = 20%%AA-%%MM-%%DD
+//* FECHAD = ODATE - 1 DIA EN AAAA-MM-DD. EL JOB CORRE EN LA MADRUGADA
+//* Y TRAE LO FORMALIZADO EL DIA ANTERIOR
+//* %%SET %%FECANT = %%$CALCDATE %%$ODATE -1
+//* %%SET %%AAAA = %%SUBSTR %%FECANT 1 4
+//* %%SET %%MM = %%SUBSTR %%FECANT 5 2
+//* %%SET %%DD = %%SUBSTR %%FECANT 7 2
+//* %%SET %%FECHAD = %%AAAA-%%MM-%%DD
 //*--------------------------------------------------------------------*
 //* PASO    : BGNDG010                                                 *
 //* PGM/UTIL: IDCAMS                                                   *
 //* OBJETIVO: BORRA LOS ARCHIVOS DEL DIA SI EXISTEN (PERMITE RELANZAR) *
-//*           COMENTADO: QUITAR LOS //* DE LAS LINEAS PARA ACTIVARLO   *
+//*           SI ALGUNO NO EXISTE (RC 8) DEJA EL MAXCC EN 0            *
 //*--------------------------------------------------------------------*
-//*BGNDG010 EXEC PGM=IDCAMS
-//*SYSPRINT DD SYSOUT=*
-//*SYSIN    DD *
-//*  DELETE PEBP.BGFD.FIX.BGJPNDG5.BGDTAPE.D0%%ODATE NONVSAM PURGE
-//*  DELETE PEBP.BGFD.FIX.BGJPNDG5.TCDT052M.D1%%ODATE NONVSAM PURGE
-//*  DELETE PEBP.BGFD.FIX.DX.BGDTAPE.UNLDIA1.D1%%ODATE NONVSAM PURGE
-//*  IF MAXCC <= 8 THEN SET MAXCC = 0
+//BGNDG010 EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+  DELETE PEBP.BGFD.FIX.BGJPNDG5.BGDTAPE.D0%%ODATE NONVSAM PURGE
+  DELETE PEBP.BGFD.FIX.BGJPNDG5.TCDT052M.D1%%ODATE NONVSAM PURGE
+  DELETE PEBP.BGFD.FIX.DX.BGDTAPE.UNLDIA1.D1%%ODATE NONVSAM PURGE
+  IF MAXCC <= 8 THEN SET MAXCC = 0
 //*--------------------------------------------------------------------*
 //* PASO    : BGNDG020                                                 *
 //* PGM/UTIL: ADUUMAIN (BMC UNLOAD PLUS)                               *
 //* OBJETIVO: DESCARGA EN CRUDO LAS PREAPERTURAS FORMALIZADAS DE       *
 //*           BGDTAPE. TRAE LA FOTO COMPLETA; PARA TRAER SOLO LO       *
-//*           FORMALIZADO EN LA FECHA DE PROCESO, QUITAR EL -- DEL     *
+//*           FORMALIZADO EL DIA ANTERIOR AL ODATE, QUITAR EL -- DEL   *
 //*           FILTRO FECHAD.                                           *
 //*           LAYOUT DE SALIDA (LRECL 134):                            *
 //*           001-10 APE_FECHA_FORMAL     011-10 APE_FECHA_APE         *
@@ -65,7 +68,7 @@
 //*           089-08 APE_USERID_UMO       097-08 APE_NETNAME_UMO       *
 //*           105-26 APE_TIMEST_UMO       131-04 APE_ENTIDAD_UMO       *
 //*--------------------------------------------------------------------*
-//BGNDG020 EXEC PGM=ADUUMAIN,
+//BGNDG020 EXEC PGM=ADUUMAIN,COND=(4,LT),
 //             PARM='DSNP,BGJPNDG5,NEW,,MSGLEVEL(1)'
 //STEPLIB  DD DSN=BMC.DB2.LOAD,DISP=SHR
 //         DD DSN=LDB2DPPA.SDSNEXIT,DISP=SHR
