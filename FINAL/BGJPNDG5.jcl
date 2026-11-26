@@ -55,10 +55,11 @@
 //*--------------------------------------------------------------------*
 //* PASO    : BGNDG020                                                 *
 //* PGM/UTIL: ADUUMAIN (BMC UNLOAD PLUS)                               *
-//* OBJETIVO: DESCARGA EN CRUDO LAS PREAPERTURAS FORMALIZADAS DE       *
-//*           BGDTAPE. TRAE LA FOTO COMPLETA; PARA TRAER SOLO LO       *
-//*           FORMALIZADO EL DIA ANTERIOR AL ODATE, QUITAR EL -- DEL   *
-//*           FILTRO FECHAD.                                           *
+//* OBJETIVO: DESCARGA EN CRUDO LAS PREAPERTURAS DE BGDTAPE (PRODUCTO  *
+//*           02 / 0046-0047). TRAE LA FOTO COMPLETA EN TODAS LAS      *
+//*           SITUACIONES. FILTROS COMENTADOS (QUITAR EL -- PARA       *
+//*           ACTIVARLOS): APE_IND_SITU='F' Y APE_FECHA_FORMAL =       *
+//*           FECHAD (DIA ANTERIOR AL ODATE).                          *
 //*           LAYOUT DE SALIDA (LRECL 134):                            *
 //*           001-10 APE_FECHA_FORMAL     011-10 APE_FECHA_APE         *
 //*           021-04 APE_ENTIDAD          025-04 APE_CENTRO_ALTA       *
@@ -94,7 +95,8 @@
   WHERE APE_PRODUCTO = '02'
      AND APE_SUBPRODU IN ('0046', '0047')
 --   AND APE_FECHA_FORMAL ='%%FECHAD'
-     AND APE_IND_SITU='F';
+--   AND APE_IND_SITU='F'
+     ;
 //*--------------------------------------------------------------------*
 //* PASO    : BGNDG030                                                 *
 //* PGM/UTIL: ICEMAN                                                   *
@@ -190,6 +192,7 @@
         IFTHEN=(WHEN=INIT,OVERLAY=(1,213,SQZ=(SHIFT=LEFT,PAIR=QUOTE))),
         IFTHEN=(WHEN=INIT,FINDREP=(IN=C'"',OUT=C''))
   OUTFIL FNAMES=SORTOUT,REMOVECC,BUILD=(1,191),
-         HEADER1=(C'FECHA_FORMAL;FECHA_APE;NRO_CUENTA;DIVISA;',
-                  C'CONCEPTO;CENTRO_UMO;NOMBRE_OFICINA;USERID_UMO;',
-                  C'NETNAME_UMO;CANAL_DESC;TIMEST')
+         HEADER1=(C'FEC_FORMALIZACION;FEC_APERTURA;NUM_CUENTA;',
+                  C'MONEDA;ORIGEN_APERTURA;COD_OFICINA_FORM;',
+                  C'NOM_OFICINA_FORM;USUARIO_FORM;TERMINAL_FORM;',
+                  C'CANAL_FORM;HORA_FORMALIZACION')
